@@ -1,6 +1,6 @@
 # JSON Editor Application
 
-# Task
+## Task
 
 Implement JSON Editor application.
 
