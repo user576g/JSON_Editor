@@ -1,11 +1,20 @@
 #include <QFileDialog>
+#include <QToolBar>
+#include <string>
+#include <QMessageBox>
 #include "file_operations.h"
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "text_proc.h"
 
 namespace file_op {
 
-bool is_on_disk = 0;
+bool is_on_disk = 0, is_changed = 0;
 QString file_path = "";
+
+void new_file() {
+    close();
+}
 
 void open()
 {
@@ -18,15 +27,12 @@ void open()
     if (file_path != "") {
         QFile file(file_path);
         file.open(QFile::ReadOnly | QFile::Text);
-        window->code_editor->setPlainText(file.readAll());
+        QString text = file.readAll();
+        window->code_editor->setPlainText(text);
+        stbar::show_full_info();
         file.close();
         is_on_disk = true;
     }
-}
-
-void new_file() {
-    MainWindow *window = MainWindow::get_instance();
-    window->code_editor->clear();
 }
 
 void save() {
@@ -47,10 +53,36 @@ void save() {
         if (file.open(QIODevice::WriteOnly)) {
             file.write(content.toUtf8());
             is_on_disk = true;
+            MainWindow::set_stbar_text("File was saved.");
         } else {
           qWarning("Could not open file");
         }
     }
+}
+
+QMessageBox::StandardButton close() {
+    MainWindow *window = MainWindow::get_instance();
+    bool is_action_canceled = false;
+    QMessageBox::StandardButton reply = QMessageBox::NoButton;
+    if (is_changed) {
+        reply = QMessageBox::question(window,
+            "File is changed", "Do you want to save it?",
+            QMessageBox::Cancel|QMessageBox::No|QMessageBox::Yes
+        );
+        if (reply == QMessageBox::Cancel){
+            is_action_canceled = true;
+        } else {
+            is_changed = false;
+            if (reply == QMessageBox::Yes) {
+                save();
+            }
+        }
+    }
+    if (!is_action_canceled) {
+        window->code_editor->clear();
+        file_path = "";
+    }
+    return reply;
 }
 
 }

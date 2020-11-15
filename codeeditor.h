@@ -43,6 +43,7 @@
 
 #include <QPlainTextEdit>
 #include <QObject>
+#include "stbar.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -64,6 +65,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    bool event(QEvent *event);
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);

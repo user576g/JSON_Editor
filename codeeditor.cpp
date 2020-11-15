@@ -41,7 +41,8 @@
 #include <QtGui>
 
 #include "codeeditor.h"
-
+#include "stbar.h"
+#include "file_operations.h"
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
@@ -148,4 +149,14 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         bottom = top + (int) blockBoundingRect(block).height();
         ++blockNumber;
     }
+}
+
+bool CodeEditor::event(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        file_op::is_changed = true;
+        stbar::key_press_react();
+    }
+
+    return QPlainTextEdit::event(event);
 }

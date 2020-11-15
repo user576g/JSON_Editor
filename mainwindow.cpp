@@ -1,10 +1,9 @@
 #include <QToolBar>
 #include <QTextEdit>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "codeeditor.h"
-#include <QFileDialog>
-using namespace std::placeholders;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *open_ac = new QAction(openpix, "&Open", this);
     QAction *save_ac = new QAction(savepix, "&Save", this);
     QAction *close_ac = new QAction("&Close", this);
-
     QAction *quit = new QAction("&Quit", this);
 
     QMenu *file = menuBar()->addMenu("&File");
@@ -32,6 +30,12 @@ MainWindow::MainWindow(QWidget *parent)
     file->addSeparator();
     file->addAction(quit);
 
+    connect(new_ac, &QAction::triggered, file_op::new_file);
+    connect(open_ac, &QAction::triggered, file_op::open);
+    connect(save_ac, &QAction::triggered, file_op::save);
+    connect(close_ac, &QAction::triggered, file_op::close);
+    connect(quit, &QAction::triggered, this, &QWidget::close);
+
     QToolBar *toolbar = addToolBar("main toolbar");
 
     QPixmap undopix(":images/undo.png");
@@ -41,20 +45,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     toolbar->addAction(QIcon(undopix), "Undo");
     toolbar->addAction(QIcon(redopix), "Redo");
-    toolbar->addAction(QIcon(savepix), "Save");
+    save_ac = toolbar->addAction(QIcon(savepix), "Save");
     toolbar->addAction(QIcon(valpix), "Validate JSON file");
     toolbar->addAction(QIcon(findpix), "Find");
+
+    connect(save_ac, &QAction::triggered, file_op::save);
 
     code_editor= new CodeEditor(this);
     setCentralWidget(code_editor);
 
-    // long notation
-    connect(new_ac, &QAction::triggered, qApp, file_op::new_file);
-    connect(save_ac, &QAction::triggered, qApp, file_op::save);
-    connect(save_ac, &QAction::triggered, qApp, file_op::save);
-    connect(quit, &QAction::triggered, qApp, QApplication::quit);
-
-    statusBar()->showMessage("Words: 34, Characters: 161");
+    statusBar()->showMessage("Welcome to JSON Editor.");
 }
 
 MainWindow::~MainWindow()
@@ -68,4 +68,18 @@ MainWindow* MainWindow::get_instance(QWidget *parent) {
         main_window = new MainWindow(parent);
     }
     return main_window;
+}
+
+void MainWindow::set_stbar_text(QString text){
+    auto window = get_instance();
+    window->statusBar()->showMessage(text);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event){
+    QMessageBox::StandardButton reply = file_op::close();
+    if (QMessageBox::Cancel == reply) {
+        event->ignore();
+    } else {
+        event->accept();
+    }
 }

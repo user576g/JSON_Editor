@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "codeeditor.h"
 #include "file_operations.h"
+#include "stbar.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow;
@@ -16,15 +17,14 @@ class MainWindow : public QMainWindow
 
 public:
     ~MainWindow();
+    CodeEditor *code_editor = nullptr;
     static MainWindow* get_instance(QWidget *parent = nullptr);
+    static void set_stbar_text(QString text);
+
 
 private:
     MainWindow(QWidget *parent = nullptr);
     Ui::MainWindow *ui;
-    CodeEditor *code_editor = nullptr;
-
-    friend void file_op::open(),
-        file_op::new_file(),
-        file_op::save() ;
+    void closeEvent(QCloseEvent *event);
 };
 #endif // MAINWINDOW_H
