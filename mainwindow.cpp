@@ -1,6 +1,7 @@
 #include <QToolBar>
 #include <QTextEdit>
 #include <QFileDialog>
+#include <QLineEdit>
 #include <sstream>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -45,18 +46,28 @@ MainWindow::MainWindow(QWidget *parent)
     QPixmap valpix(":images/validate.png");
     QPixmap findpix(":images/find.svg");
 
-    toolbar->addAction(QIcon(undopix), "Undo");
-    toolbar->addAction(QIcon(redopix), "Redo");
+//    toolbar->addAction(QIcon(undopix), "Undo");
+//    toolbar->addAction(QIcon(redopix), "Redo");
     save_ac = toolbar->addAction(QIcon(savepix), "Save");
     QAction *val_ac = toolbar->addAction(QIcon(valpix),
                                          "Validate JSON file");
-    toolbar->addAction(QIcon(findpix), "Find");
+    QWidget *spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    toolbar->addWidget(spacer);
+    line_edit = new QLineEdit("Write something to find...", this);
+    line_edit->setFixedWidth(200);
+    toolbar->addWidget(line_edit);
+    QAction *find_ac = toolbar->addAction(QIcon(findpix), "Find");
 
     connect(save_ac, &QAction::triggered, file_op::save);
     connect(val_ac, &QAction::triggered, this, &MainWindow::verify_msg);
+    connect(find_ac, &QAction::triggered, this, &MainWindow::on_find_clicked);
+    connect(line_edit, &QLineEdit::textChanged,
+            this, [=]() {isFirstTime = true;});
 
     code_editor= new CodeEditor(this);
     setCentralWidget(code_editor);
+    code_editor->setUndoRedoEnabled(true);
 
     statusBar()->showMessage("Welcome to JSON Editor.");
 }
@@ -113,4 +124,53 @@ void MainWindow::verify_msg(){
     QMessageBox::information(this,
                              "Validation result",
                              QString(ss.str().c_str()));
+}
+
+void MainWindow::on_find_clicked() {
+    QString searchString = line_edit->text();
+    QTextDocument *document = code_editor->document();
+
+    bool found = false;
+
+    if (isFirstTime == false)
+        document->undo();
+
+    if (searchString.isEmpty()) {
+        QMessageBox::information(this, tr("Empty Search Field"),
+                "The search field is empty. Please enter a word and click Find.");
+        return;
+    } else if (document->isEmpty()) {
+        QMessageBox::information(this, tr("File is empty."),
+                "File is empty.");
+        return;
+    } else {
+
+        QTextCursor highlightCursor(document);
+        QTextCursor cursor(document);
+
+        cursor.beginEditBlock();
+
+        QTextCharFormat plainFormat(highlightCursor.charFormat());
+        QTextCharFormat colorFormat = plainFormat;
+        colorFormat.setForeground(Qt::darkGreen);
+
+        while (!highlightCursor.isNull() && !highlightCursor.atEnd()) {
+            highlightCursor = document->find(searchString, highlightCursor);
+
+            if (!highlightCursor.isNull()) {
+                found = true;
+                highlightCursor.movePosition(QTextCursor::WordRight,
+                                       QTextCursor::KeepAnchor);
+                highlightCursor.mergeCharFormat(colorFormat);
+            }
+        }
+
+        cursor.endEditBlock();
+        isFirstTime = false;
+
+        if (found == false) {
+            QMessageBox::information(this, tr("Word Not Found"),
+                "Sorry, the word cannot be found.");
+        }
+    }
 }

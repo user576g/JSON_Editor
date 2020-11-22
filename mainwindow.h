@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLineEdit>
 #include "codeeditor.h"
 #include "file_operations.h"
 #include "stbar.h"
@@ -23,9 +24,13 @@ public:
 
 
 private:
+    QLineEdit *line_edit = nullptr;
+    bool isFirstTime = true;
+
     MainWindow(QWidget *parent = nullptr);
     Ui::MainWindow *ui;
     void closeEvent(QCloseEvent *event);
     void verify_msg();
+    void on_find_clicked();
 };
 #endif // MAINWINDOW_H
