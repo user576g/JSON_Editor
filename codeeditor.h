@@ -62,6 +62,7 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
+    void setJSON(QString);
 
 protected:
     void resizeEvent(QResizeEvent *event);

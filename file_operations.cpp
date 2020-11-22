@@ -28,7 +28,7 @@ void open()
         QFile file(file_path);
         file.open(QFile::ReadOnly | QFile::Text);
         QString text = file.readAll();
-        window->code_editor->setPlainText(text);
+        window->code_editor->setJSON(text);
         stbar::show_full_info();
         file.close();
         is_on_disk = true;

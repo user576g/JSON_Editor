@@ -160,3 +160,47 @@ bool CodeEditor::event(QEvent *event)
 
     return QPlainTextEdit::event(event);
 }
+
+void CodeEditor::setJSON(QString text) {
+    QTextCharFormat black_tf, blue_tf, red_tf;
+
+    black_tf = currentCharFormat();
+
+    blue_tf = currentCharFormat();
+    blue_tf.setForeground(QBrush(Qt::GlobalColor::darkBlue));
+
+    red_tf = currentCharFormat();
+    red_tf.setForeground(QBrush(Qt::GlobalColor::red));
+
+    int state = 0;
+
+    for (QChar qch : text) {
+        if ('[' == qch) {
+            state = -1;
+        } else if (']' == qch) {
+            state = 0;
+        } else if ('"' == qch) {
+            switch (state) {
+            case 0:
+                setCurrentCharFormat(red_tf);
+                ++state;
+                break;
+            case 1:
+                setCurrentCharFormat(black_tf);
+                ++state;
+                break;
+            case 2:
+                setCurrentCharFormat(blue_tf);
+                ++state;
+                break;
+            case 3:
+                setCurrentCharFormat(black_tf);
+                state = 0;
+                break;
+            }
+        } else if (2 == state && ('{' == qch || qch.isDigit())) {
+            state = 0;
+        }
+        insertPlainText(qch);
+    }
+}
