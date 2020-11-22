@@ -29,8 +29,19 @@ val_res isValid(QString text) {
     std::stack<char> stack;
     val_res result;
     char last = 0;
+
     for (QChar qch : text) {
         char ch = qch.toLatin1();
+
+    // ignore symbols in double quotes
+        if (!stack.empty()
+                && '"' == stack.top()
+                && '"' != ch
+                ) {
+            ++result.at;
+            continue;
+        }
+
         switch (ch) {
         case '\"':
            if (stack.empty()) {
