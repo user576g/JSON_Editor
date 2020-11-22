@@ -53,6 +53,7 @@ void save() {
         if (file.open(QIODevice::WriteOnly)) {
             file.write(content.toUtf8());
             is_on_disk = true;
+            is_changed = false;
             MainWindow::set_stbar_text("File was saved.");
         } else {
           qWarning("Could not open file");
@@ -81,6 +82,7 @@ QMessageBox::StandardButton close() {
     if (!is_action_canceled) {
         window->code_editor->clear();
         file_path = "";
+        window->set_stbar_text("File is closed.");
     }
     return reply;
 }

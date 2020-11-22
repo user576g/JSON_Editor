@@ -1,5 +1,7 @@
 #include <cstring>
 #include "text_proc.h"
+#include <stack>
+#include <iostream>
 
 namespace text_proc
 {
@@ -21,5 +23,98 @@ unsigned long long count_words(QString text) {
         ++counter;
     }
     return counter;
+}
+
+val_res isValid(QString text) {
+    std::stack<char> stack;
+    val_res result;
+    char last = 0;
+    for (QChar qch : text) {
+        char ch = qch.toLatin1();
+        switch (ch) {
+        case '\"':
+           if (stack.empty()) {
+                return result;
+           }
+           last = stack.top();
+           if (last == '\"') {
+                // It's a closing quote
+                stack.pop();
+           } else {
+                // It's an opening quote
+                stack.push(ch);
+           }
+           break;
+        case ':':
+            if (stack.empty()) {
+                 return result;
+            }
+            last = stack.top();
+            if ('"' != last) {
+                stack.push(ch);
+            }
+            break;
+        case ',':
+            if (stack.empty()) {
+                 return result;
+            }
+            last = stack.top();
+            if (':' == last) {
+                stack.pop();
+            } else {
+                stack.push(ch);
+            }
+            break;
+        case '{':
+            stack.push(ch);
+            break;
+        case '}':
+            std::cerr << "stack.top() = " << stack.top();
+            if (stack.empty()) {
+                return result;
+            }
+            last = stack.top();
+            if (last == '{') {
+                stack.pop();
+            } else {
+                if (last == ':') {
+                    stack.pop();
+                    last = stack.top();
+                    if ('{' == last) {
+                        stack.pop();
+                    } else {
+                        return result;
+                    }
+                } else {
+                    return result;
+                }
+            }
+            break;
+        case '[':
+            stack.push(ch);
+            break;
+        case ']':
+            if (stack.empty()) {
+                return result;
+            }
+            last = stack.top();
+            while (',' == last) {
+                stack.pop();
+                last = stack.top();
+            }
+            if (last == '[') {
+                stack.pop();
+            } else {
+                return result;
+            }
+            break;
+        case '\n':
+            ++result.row;
+            result.at = 1;
+        }
+        ++result.at;
+    }
+    result.isValid = stack.empty();
+    return result;
 }
 }

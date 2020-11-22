@@ -1,9 +1,11 @@
 #include <QToolBar>
 #include <QTextEdit>
 #include <QFileDialog>
+#include <sstream>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "codeeditor.h"
+#include "text_proc.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -46,10 +48,12 @@ MainWindow::MainWindow(QWidget *parent)
     toolbar->addAction(QIcon(undopix), "Undo");
     toolbar->addAction(QIcon(redopix), "Redo");
     save_ac = toolbar->addAction(QIcon(savepix), "Save");
-    toolbar->addAction(QIcon(valpix), "Validate JSON file");
+    QAction *val_ac = toolbar->addAction(QIcon(valpix),
+                                         "Validate JSON file");
     toolbar->addAction(QIcon(findpix), "Find");
 
     connect(save_ac, &QAction::triggered, file_op::save);
+    connect(val_ac, &QAction::triggered, this, &MainWindow::verify_msg);
 
     code_editor= new CodeEditor(this);
     setCentralWidget(code_editor);
@@ -82,4 +86,25 @@ void MainWindow::closeEvent(QCloseEvent *event){
     } else {
         event->accept();
     }
+}
+
+void MainWindow::verify_msg(){
+    std::stringstream ss;
+    ss << "The file is ";
+    QString text = code_editor->toPlainText();
+    text_proc::val_res result = text_proc::isValid(text);
+    if (result.isValid) {
+        ss << "VALID ";
+    } else {
+        ss << "NOT valid ";
+    }
+    ss << "JSON file!";
+    if (!result.isValid) {
+        ss << "\nThe reason can be somewhere near line "
+              << result.row
+              << ", character " << result.at;
+    }
+    QMessageBox::information(this,
+                             "Validation result",
+                             QString(ss.str().c_str()));
 }

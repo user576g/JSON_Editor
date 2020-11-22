@@ -26,5 +26,6 @@ private:
     MainWindow(QWidget *parent = nullptr);
     Ui::MainWindow *ui;
     void closeEvent(QCloseEvent *event);
+    void verify_msg();
 };
 #endif // MAINWINDOW_H
