@@ -1,7 +1,6 @@
 #include <cstring>
 #include "text_proc.h"
 #include <stack>
-#include <iostream>
 
 namespace text_proc
 {
@@ -80,7 +79,6 @@ val_res isValid(QString text) {
             stack.push(ch);
             break;
         case '}':
-            std::cerr << "stack.top() = " << stack.top();
             if (stack.empty()) {
                 return result;
             }

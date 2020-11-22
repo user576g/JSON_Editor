@@ -89,9 +89,15 @@ void MainWindow::closeEvent(QCloseEvent *event){
 }
 
 void MainWindow::verify_msg(){
+    QString text = code_editor->toPlainText();
+    if (text.isEmpty()) {
+        QMessageBox::information(this,
+                                 "File is empty.",
+                                 "File is empty.");
+        return;
+    }
     std::stringstream ss;
     ss << "The file is ";
-    QString text = code_editor->toPlainText();
     text_proc::val_res result = text_proc::isValid(text);
     if (result.isValid) {
         ss << "VALID ";
