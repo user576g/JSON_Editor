@@ -23,4 +23,4 @@ modules description, class diagram, sequence diagram).
 
 # Executables
 
-If you have QT you can build app from sources else you can download [build for Windows](https://github.com/user576g/JSON_Editor/releases/download/v1.0.0/JSON_Editor.exe).
+If you have QT you can build app from sources else you can download [build for Windows](https://github.com/user576g/JSON_Editor/releases/download/v1.0.0/release.zip).
